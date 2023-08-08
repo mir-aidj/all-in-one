@@ -1,0 +1,25 @@
+[build-system]
+#requires = ["setuptools"]
+#build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "allinone"
+version = "0.0.1"
+dependencies = [
+  "numpy",
+  "madmom",
+  "librosa",
+  "natten",
+  "demucs",
+  "hydra-core",
+  "omegaconf",
+  "huggingface_hub",
+]
+
+[project.scripts]
+allinone = "allinone.cli:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
