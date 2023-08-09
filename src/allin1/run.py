@@ -18,6 +18,7 @@ def analyze(
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
   demix_dir: PathLike = './demixed',
   spec_dir: PathLike = './spectrograms',
+  delete_byproducts: bool = False,
 ):
   # Clean up arguments.
   if not isinstance(paths, list):
@@ -49,6 +50,14 @@ def analyze(
 
       result = AnalysisResult(**metrical_structure, segments=functional_structure)
       results.append(result)
+
+  if delete_byproducts:
+    for path in demix_paths:
+      for stem in ['bass', 'drums', 'other', 'vocals']:
+        (path / f'{stem}.wav').unlink(missing_ok=True)
+      path.rmdir()
+    for path in spec_paths:
+      path.unlink()
 
   if len(paths) == 1:
     return results[0]

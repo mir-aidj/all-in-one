@@ -1,25 +1,49 @@
 [build-system]
-#requires = ["setuptools"]
-#build-backend = "setuptools.build_meta"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "allinone"
-version = "0.0.1"
+name = "allin1"
+dynamic = ["version"]
+description = "All-In-One Music Structure Analyzer"
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+keywords = ["music", "beat", "downbeat", "tracking", "structure", "analysis", "allin1"]
+authors = [
+  { name = "Taejun Kim", email = "taejun@kaist.ac.kr" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
 dependencies = [
   "numpy",
-  "madmom",
   "librosa",
-  "natten",
+  "natten; platform_system == 'Darwin'",
   "demucs",
   "hydra-core",
   "omegaconf",
   "huggingface_hub",
 ]
 
-[project.scripts]
-allinone = "allinone.cli:main"
+[project.urls]
+Documentation = "https://github.com/mir-aidj/all-in-one#readme"
+Issues = "https://github.com/mir-aidj/all-in-one/issues"
+Source = "https://github.com/mir-aidj/all-in-one"
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[project.scripts]
+allin1 = "allin1.cli:main"
+
+[tool.hatch.version]
+path = "src/allin1/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/allin1"]

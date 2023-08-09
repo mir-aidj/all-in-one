@@ -6,7 +6,7 @@ from scipy.signal import argrelextrema
 from scipy.interpolate import interp1d
 from numpy.lib.stride_tricks import sliding_window_view
 from numpy.typing import NDArray
-from allinone.config import Config
+from ..config import Config
 
 def event_frames_to_time(
   tensor: torch.Tensor | NDArray,
