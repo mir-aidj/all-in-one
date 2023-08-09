@@ -9,12 +9,16 @@ from .typings import AnalysisResult
 from .demix import demix
 from .spectrogram import extract_spectrograms
 from .models import load_pretrained_model
-from .postprocessing import postprocess_metrical_structure, postprocess_functional_structure
+from .postprocessing import (
+  postprocess_metrical_structure,
+  postprocess_functional_structure,
+  estimate_tempo_from_beats,
+)
 
 
 def analyze(
   paths: PathLike | List[PathLike],
-  model: str = 'harmonix-fold0',
+  model: str = 'harmonix-all',
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
   demix_dir: PathLike = './demixed',
   spec_dir: PathLike = './spectrograms',
@@ -27,6 +31,10 @@ def analyze(
   demix_dir = Path(demix_dir).expanduser().resolve()
   spec_dir = Path(spec_dir).expanduser().resolve()
   device = torch.device(device)
+
+  paths = expand_paths(paths)
+  check_paths(paths)
+  print(f'=> Found {len(paths)} tracks to analyze.')
 
   demix_paths = demix(paths, demix_dir)
 
@@ -47,8 +55,9 @@ def analyze(
 
       metrical_structure = postprocess_metrical_structure(logits, model.cfg)
       functional_structure = postprocess_functional_structure(logits, model.cfg)
+      bpm = estimate_tempo_from_beats(metrical_structure['beats'])
 
-      result = AnalysisResult(**metrical_structure, segments=functional_structure)
+      result = AnalysisResult(**metrical_structure, bpm=bpm, segments=functional_structure)
       results.append(result)
 
   if delete_byproducts:
@@ -63,3 +72,26 @@ def analyze(
     return results[0]
   else:
     return results
+
+
+def expand_paths(paths: List[Path]):
+  expanded_paths = set()
+  for path in paths:
+    if '*' in str(path) or '?' in str(path):
+      matches = list(path.parent.glob(path.name))
+      if not matches:
+        raise FileNotFoundError(f'Could not find any files matching {path}')
+      expanded_paths.update(matches)
+    else:
+      expanded_paths.add(path)
+
+  return list(expanded_paths)
+
+
+def check_paths(paths: List[Path]):
+  missing_files = []
+  for path in paths:
+    if not path.is_file():
+      missing_files.append(str(path))
+  if missing_files:
+    raise FileNotFoundError(f'Could not find the following files: {missing_files}')

@@ -19,17 +19,21 @@ def demix(paths: List[Path], demix_dir: Path):
         (out_dir / 'other.wav').is_file() and
         (out_dir / 'vocals.wav').is_file()
       ):
-        print(f'=> {path} is already demixed.')
         continue
     todos.append(path)
 
+  existing = len(paths) - len(todos)
+  print(f'=> Found {existing} tracks already demixed, {len(todos)} to demix.')
+
   if todos:
-    print(f'=> Start demixing {len(todos)} tracks.')
-    subprocess.run([
-      sys.executable, '-m', 'demucs.separate',
-      '-o', demix_dir,
-      '-n', 'htdemucs',
-      ' '.join([str(p) for p in todos]),
-    ])
+    subprocess.run(
+      [
+        sys.executable, '-m', 'demucs.separate',
+        '-o', demix_dir,
+        '-n', 'htdemucs',
+        *todos,
+      ],
+      check=True,
+    )
 
   return demix_paths

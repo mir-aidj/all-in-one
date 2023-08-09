@@ -8,8 +8,6 @@ from ..config import Config
 from ..typings import AllInOneOutput
 
 
-# TODO: Remove output_attentions
-
 class AllInOne(nn.Module):
   def __init__(self, cfg: Config):
     super().__init__()

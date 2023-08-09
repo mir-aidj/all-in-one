@@ -1,1 +1,1 @@
-from .run import analyze
+from .analyze import analyze

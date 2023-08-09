@@ -16,13 +16,13 @@ def extract_spectrograms(demix_paths: List[Path], spec_dir: Path):
     dst = spec_dir / f'{src.stem}.npy'
     spec_paths.append(dst)
     if dst.is_file():
-      print(f'=> {src.stem} already has spectrogram.')
       continue
     todos.append((src, dst))
 
-  if not todos:
-    print('=> No tracks to extract spectrograms.')
-  else:
+  existing = len(spec_paths) - len(todos)
+  print(f'=> Found {existing} spectrograms already extracted, {len(todos)} to extract.')
+
+  if todos:
     # Define a pre-processing chain, which is copied from madmom.
     frames = FramedSignalProcessor(
       frame_size=2048,

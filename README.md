@@ -11,6 +11,7 @@
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Advanced Usage for Research](#advanced-usage-for-research)
 - [Citation](#citation)
 
 ## Installation
@@ -62,7 +63,7 @@ brew install ffmpeg
 ### CLI
 
 ```shell
-allin1 your_audio_file1.wav your_audio_file2.wav
+allin1 your_audio_file1.wav your_audio_file2.mp3
 ```
 The result will be saved in `./structures:
 ```shell
@@ -111,7 +112,7 @@ import allinone
 result = allinone.analyze('your_audio_file.wav')
 
 # Or multiple files:
-results = allinone.analyze(['your_audio_file1.wav', 'your_audio_file2.wav'])
+results = allinone.analyze(['your_audio_file1.wav', 'your_audio_file2.mp3'])
 ```
 A result is a dataclass instance containing:
 ```python
@@ -132,6 +133,14 @@ AnalysisResult(
     Segment(start=153.95, end=154.67, label='end'),
   ]),
 ```
+
+## Advanced Usage for Research
+
+TODO
+
+## Available Models
+
+TODO
 
 ## Citation
 

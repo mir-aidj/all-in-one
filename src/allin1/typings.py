@@ -12,6 +12,7 @@ class Segment:
 
 @dataclass
 class AnalysisResult:
+  bpm: int
   beats: List[float]
   downbeats: List[float]
   beat_positions: List[int]
@@ -24,4 +25,3 @@ class AllInOneOutput:
   logits_downbeat: torch.FloatTensor = None
   logits_section: torch.FloatTensor = None
   logits_function: torch.FloatTensor = None
-  logits_tempo: torch.FloatTensor = None

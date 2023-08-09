@@ -5,6 +5,7 @@ from typing import Optional
 from omegaconf import OmegaConf
 from huggingface_hub import hf_hub_download
 from .allinone import AllInOne
+from .ensemble import Ensemble
 
 NAME_TO_FILE = {
   'harmonix-fold0': 'harmonix-fold0-0vra4ys2.pth',
@@ -17,12 +18,28 @@ NAME_TO_FILE = {
   'harmonix-fold7': 'harmonix-fold7-qwwskhg6.pth',
 }
 
+ENSEMBLE = {
+  'harmonix-all': [
+    'harmonix-fold0',
+    'harmonix-fold1',
+    'harmonix-fold2',
+    'harmonix-fold3',
+    'harmonix-fold4',
+    'harmonix-fold5',
+    'harmonix-fold6',
+    'harmonix-fold7',
+  ],
+}
+
 
 def load_pretrained_model(
   model_name: Optional[str] = None,
   cache_dir: Optional[PathLike] = None,
   device=None,
 ):
+  if model_name in ENSEMBLE:
+    return load_ensemble_model(model_name, cache_dir, device)
+
   model_name = model_name or list(NAME_TO_FILE.keys())[0]
   assert model_name in NAME_TO_FILE, f'Unknown model name: {model_name} (expected one of {list(NAME_TO_FILE.keys())})'
 
@@ -43,3 +60,19 @@ def load_pretrained_model(
   model.eval()
 
   return model
+
+
+def load_ensemble_model(
+  model_name: Optional[str] = None,
+  cache_dir: Optional[PathLike] = None,
+  device=None,
+):
+  models = []
+  for model_name in ENSEMBLE[model_name]:
+    model = load_pretrained_model(model_name, cache_dir, device)
+    models.append(model)
+
+  ensemble = Ensemble(models).to(device)
+  ensemble.eval()
+
+  return ensemble
