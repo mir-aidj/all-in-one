@@ -6,8 +6,8 @@ This package provides tools for music structure analysis, predicting:
 1. Tempo (BPM)
 2. Beats
 3. Downbeats
-4. Functional segment boundaries
-5. Functional segment labels (e.g., intro, verse, chorus, bridge, outro)
+4. Section boundaries
+5. Section labels (e.g., intro, verse, chorus, bridge, outro)
 
 
 -----
