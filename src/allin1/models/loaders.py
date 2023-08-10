@@ -18,7 +18,7 @@ NAME_TO_FILE = {
   'harmonix-fold7': 'harmonix-fold7-qwwskhg6.pth',
 }
 
-ENSEMBLE = {
+ENSEMBLE_MODELS = {
   'harmonix-all': [
     'harmonix-fold0',
     'harmonix-fold1',
@@ -37,7 +37,7 @@ def load_pretrained_model(
   cache_dir: Optional[PathLike] = None,
   device=None,
 ):
-  if model_name in ENSEMBLE:
+  if model_name in ENSEMBLE_MODELS:
     return load_ensemble_model(model_name, cache_dir, device)
 
   model_name = model_name or list(NAME_TO_FILE.keys())[0]
@@ -68,7 +68,7 @@ def load_ensemble_model(
   device=None,
 ):
   models = []
-  for model_name in ENSEMBLE[model_name]:
+  for model_name in ENSEMBLE_MODELS[model_name]:
     model = load_pretrained_model(model_name, cache_dir, device)
     models.append(model)
 

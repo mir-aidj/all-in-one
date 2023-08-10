@@ -1,11 +1,12 @@
-import os
 import sys
 import subprocess
+import torch
+
 from pathlib import Path
 from typing import List
 
 
-def demix(paths: List[Path], demix_dir: Path):
+def demix(paths: List[Path], demix_dir: Path, device: str | torch.device):
   """Demixes the audio file into its sources."""
   todos = []
   demix_paths = []
@@ -29,8 +30,9 @@ def demix(paths: List[Path], demix_dir: Path):
     subprocess.run(
       [
         sys.executable, '-m', 'demucs.separate',
-        '-o', demix_dir,
-        '-n', 'htdemucs',
+        '--out', demix_dir,
+        '--name', 'htdemucs',
+        '--device', str(device),
         *todos,
       ],
       check=True,

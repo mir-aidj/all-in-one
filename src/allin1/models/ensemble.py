@@ -24,5 +24,7 @@ class Ensemble(nn.Module):
       logits_downbeat=torch.stack([output.logits_downbeat for output in outputs], dim=0).mean(dim=0),
       logits_section=torch.stack([output.logits_section for output in outputs], dim=0).mean(dim=0),
       logits_function=torch.stack([output.logits_function for output in outputs], dim=0).mean(dim=0),
+      embeddings=torch.stack([output.embeddings for output in outputs], dim=-1),
     )
+
     return avg

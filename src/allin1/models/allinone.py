@@ -68,6 +68,7 @@ class AllInOne(nn.Module):
       logits_downbeat=logits_downbeat,
       logits_section=logits_section,
       logits_function=logits_function,
+      embeddings=hidden_states,
     )
 
 
@@ -254,7 +255,7 @@ class Head(nn.Module):
     self.classifier.bias.data.fill_(-torch.log(torch.tensor(1 / confidence - 1)))
 
   def forward(self, x: torch.FloatTensor):
-    # x shape: N, K, T, C=16
+    # x shape: N, K, T, C=24
     batch, inst, frame, embed = x.shape
     x = x.permute(0, 2, 1, 3)  # batch, frame, inst, embed
     x = x.reshape(batch, frame, inst * embed)  # batch, frame, inst x embed
