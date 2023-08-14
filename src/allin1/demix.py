@@ -30,10 +30,10 @@ def demix(paths: List[Path], demix_dir: Path, device: str | torch.device):
     subprocess.run(
       [
         sys.executable, '-m', 'demucs.separate',
-        '--out', demix_dir,
+        '--out', demix_dir.as_posix(),
         '--name', 'htdemucs',
         '--device', str(device),
-        *todos,
+        *[path.as_posix() for path in todos],
       ],
       check=True,
     )

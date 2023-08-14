@@ -2,7 +2,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/allin1.svg)](https://pypi.org/project/haha)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/allin1.svg)](https://pypi.org/project/allin1)
 
-This package provides tools for music structure analysis, predicting:
+This package provides models for music structure analysis, predicting:
 1. Tempo (BPM)
 2. Beats
 3. Downbeats
