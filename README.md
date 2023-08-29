@@ -1,5 +1,5 @@
 # All-In-One Music Structure Analyzer
-[![PyPI - Version](https://img.shields.io/pypi/v/allin1.svg)](https://pypi.org/project/haha)
+[![PyPI - Version](https://img.shields.io/pypi/v/allin1.svg)](https://pypi.org/project/allin1)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/allin1.svg)](https://pypi.org/project/allin1)
 
 This package provides models for music structure analysis, predicting:
