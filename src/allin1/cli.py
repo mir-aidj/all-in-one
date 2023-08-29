@@ -1,14 +1,7 @@
-import numpy as np
-import re
-import json
 import argparse
 import torch
 
-from os import PathLike
-from typing import List
 from pathlib import Path
-from dataclasses import asdict
-from .typings import AnalysisResult
 from .analyze import analyze
 
 
@@ -43,8 +36,11 @@ def main():
   if not args.paths:
     raise ValueError('At least one path must be specified.')
 
-  results = analyze(
+  assert args.out_dir is not None, 'Output directory must be specified with --out-dir'
+
+  analyze(
     paths=args.paths,
+    out_dir=args.out_dir,
     model=args.model,
     device=args.device,
     include_activations=args.activ,
@@ -54,45 +50,7 @@ def main():
     keep_byproducts=args.keep_byproducts,
   )
 
-  save_results(results, args.out_dir)
-
   print(f'=> Analysis results are successfully saved to {args.out_dir}')
-
-
-def save_results(
-  results: List[AnalysisResult] | AnalysisResult,
-  out_dir: PathLike,
-):
-  if not isinstance(results, list):
-    results = [results]
-
-  out_dir = Path(out_dir).expanduser().resolve()
-  out_dir.mkdir(parents=True, exist_ok=True)
-  for result in results:
-    out_path = out_dir / result.path.with_suffix('.json').name
-    result = asdict(result)
-    result['path'] = str(result['path'])
-
-    activations = result.pop('activations')
-    if activations is not None:
-      np.savez(str(out_path.with_suffix('.activ.npz')), **activations)
-
-    embeddings = result.pop('embeddings')
-    if embeddings is not None:
-      np.save(str(out_path.with_suffix('.embed.npy')), embeddings)
-
-    json_str = json.dumps(result, indent=2)
-    json_str = _compact_json_number_array(json_str)
-    out_path.with_suffix('.json').write_text(json_str)
-
-
-def _compact_json_number_array(json_str: str):
-  """Compact numbers (including floats) in JSON arrays to be on the same line."""
-  return re.sub(
-    r'(\[\n(?:\s*\d+(\.\d+)?,\n)+\s*\d+(\.\d+)?\n\s*\])',
-    lambda m: m.group(1).replace('\n', '').replace(' ', ''),
-    json_str
-  )
 
 
 if __name__ == '__main__':

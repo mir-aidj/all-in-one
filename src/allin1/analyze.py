@@ -2,10 +2,8 @@ import numpy as np
 import torch
 
 from os import PathLike
-from pathlib import Path
 from typing import List
 from tqdm import tqdm
-from .typings import AllInOneOutput, AnalysisResult
 from .demix import demix
 from .spectrogram import extract_spectrograms
 from .models import load_pretrained_model
@@ -14,10 +12,19 @@ from .postprocessing import (
   postprocess_functional_structure,
   estimate_tempo_from_beats,
 )
-
+from .helpers import (
+  compute_activations,
+  expand_paths,
+  check_paths,
+  rmdir_if_empty,
+  save_results,
+)
+from .utils import _mkpath
+from .typings import  AnalysisResult
 
 def analyze(
   paths: PathLike | List[PathLike],
+  out_dir: PathLike = None,
   model: str = 'harmonix-all',
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
   include_activations: bool = False,
@@ -29,11 +36,11 @@ def analyze(
   # Clean up arguments.
   if not isinstance(paths, list):
     paths = [paths]
-  paths = [Path(p).expanduser().resolve() for p in paths]
+  paths = [_mkpath(p) for p in paths]
   paths = expand_paths(paths)
   check_paths(paths)
-  demix_dir = Path(demix_dir).expanduser().resolve()
-  spec_dir = Path(spec_dir).expanduser().resolve()
+  demix_dir = _mkpath(demix_dir)
+  spec_dir = _mkpath(spec_dir)
   device = torch.device(device)
   print(f'=> Found {len(paths)} tracks to analyze.')
 
@@ -88,50 +95,11 @@ def analyze(
       path.unlink(missing_ok=True)
     rmdir_if_empty(spec_dir)
 
+  if out_dir is not None:
+    save_results(results, out_dir)
+
   if len(paths) == 1:
     return results[0]
   else:
     return results
 
-
-def compute_activations(logits: AllInOneOutput):
-  activations_beat = torch.sigmoid(logits.logits_beat[0]).cpu().numpy()
-  activations_downbeat = torch.sigmoid(logits.logits_downbeat[0]).cpu().numpy()
-  activations_segment = torch.sigmoid(logits.logits_section[0]).cpu().numpy()
-  activations_label = torch.softmax(logits.logits_function[0], dim=0).cpu().numpy()
-  return {
-    'beat': activations_beat,
-    'downbeat': activations_downbeat,
-    'segment': activations_segment,
-    'label': activations_label,
-  }
-
-
-def expand_paths(paths: List[Path]):
-  expanded_paths = set()
-  for path in paths:
-    if '*' in str(path) or '?' in str(path):
-      matches = list(path.parent.glob(path.name))
-      if not matches:
-        raise FileNotFoundError(f'Could not find any files matching {path}')
-      expanded_paths.update(matches)
-    else:
-      expanded_paths.add(path)
-
-  return list(expanded_paths)
-
-
-def check_paths(paths: List[Path]):
-  missing_files = []
-  for path in paths:
-    if not path.is_file():
-      missing_files.append(str(path))
-  if missing_files:
-    raise FileNotFoundError(f'Could not find the following files: {missing_files}')
-
-
-def rmdir_if_empty(path: Path):
-  try:
-    path.rmdir()
-  except (FileNotFoundError, OSError):
-    pass

@@ -136,13 +136,13 @@ options:
 ### Python
 
 ```python
-import allinone
+import allin1
 
 # You can analyze a single file:
-result = allinone.analyze('your_audio_file.wav')
+result = allin1.analyze('your_audio_file.wav')
 
 # Or multiple files:
-results = allinone.analyze(['your_audio_file1.wav', 'your_audio_file2.mp3'])
+results = allin1.analyze(['your_audio_file1.wav', 'your_audio_file2.mp3'])
 ```
 A result is a dataclass instance containing:
 ```python
@@ -165,10 +165,18 @@ AnalysisResult(
     Segment(start=153.95, end=154.67, label='end'),
   ]),
 ```
+Unlike CLI, it does not save the results to disk by default. You can save them as follows:
+```python
+result = allin1.analyze(
+  'your_audio_file.wav',
+  out_dir='./structures',  # None by default
+)
+``` 
 The Python API `allin1.analyze()` offers the same options as the CLI:
 ```python
 def analyze(
   paths: PathLike | List[PathLike],
+  out_dir: PathLike = None,
   model: str = 'harmonix-all',
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
   include_activations: bool = False,
