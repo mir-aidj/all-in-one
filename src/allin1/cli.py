@@ -71,7 +71,7 @@ def save_results(
   for result in results:
     out_path = out_dir / result.path.with_suffix('.json').name
     result = asdict(result)
-    result['path'] = str(out_path)
+    result['path'] = str(result['path'])
 
     activations = result.pop('activations')
     if activations is not None:
@@ -82,11 +82,11 @@ def save_results(
       np.save(str(out_path.with_suffix('.embed.npy')), embeddings)
 
     json_str = json.dumps(result, indent=2)
-    json_str = compact_json_number_array(json_str)
+    json_str = _compact_json_number_array(json_str)
     out_path.with_suffix('.json').write_text(json_str)
 
 
-def compact_json_number_array(json_str: str):
+def _compact_json_number_array(json_str: str):
   """Compact numbers (including floats) in JSON arrays to be on the same line."""
   return re.sub(
     r'(\[\n(?:\s*\d+(\.\d+)?,\n)+\s*\d+(\.\d+)?\n\s*\])',
