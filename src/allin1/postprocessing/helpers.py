@@ -2,6 +2,7 @@ import numpy as np
 import torch.nn.functional as F
 import torch
 import librosa
+from typing import Union
 from scipy.signal import argrelextrema
 from scipy.interpolate import interp1d
 from numpy.lib.stride_tricks import sliding_window_view
@@ -9,7 +10,7 @@ from numpy.typing import NDArray
 from ..config import Config
 
 def event_frames_to_time(
-  tensor: torch.Tensor | NDArray,
+  tensor: Union[NDArray, torch.Tensor],
   cfg: Config = None,
   sample_rate: int = None,
   hop_size: int = None,

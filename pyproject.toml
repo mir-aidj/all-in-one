@@ -7,7 +7,7 @@ name = "allin1"
 dynamic = ["version"]
 description = "All-In-One Music Structure Analyzer"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = "MIT"
 keywords = ["music", "beat", "downbeat", "tracking", "structure", "analysis", "allin1"]
 authors = [
@@ -16,7 +16,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",

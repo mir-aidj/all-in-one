@@ -3,10 +3,10 @@ import subprocess
 import torch
 
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 
-def demix(paths: List[Path], demix_dir: Path, device: str | torch.device):
+def demix(paths: List[Path], demix_dir: Path, device: Union[str, torch.device]):
   """Demixes the audio file into its sources."""
   todos = []
   demix_paths = []

@@ -5,7 +5,7 @@ import torch
 from os import PathLike
 from dataclasses import asdict
 from pathlib import Path
-from typing import List
+from typing import List, Union
 from .utils import _mkpath, _compact_json_number_array
 from .typings import AllInOneOutput, AnalysisResult
 
@@ -54,7 +54,7 @@ def rmdir_if_empty(path: Path):
 
 
 def save_results(
-  results: List[AnalysisResult] | AnalysisResult,
+  results: Union[AnalysisResult, List[AnalysisResult]],
   out_dir: PathLike,
 ):
   if not isinstance(results, list):

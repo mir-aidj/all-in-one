@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from os import PathLike
-from typing import List
+from typing import List, Union
 from tqdm import tqdm
 from .demix import demix
 from .spectrogram import extract_spectrograms
@@ -23,7 +23,7 @@ from .utils import _mkpath
 from .typings import  AnalysisResult
 
 def analyze(
-  paths: PathLike | List[PathLike],
+  paths: Union[List[PathLike], PathLike],
   out_dir: PathLike = None,
   model: str = 'harmonix-all',
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
