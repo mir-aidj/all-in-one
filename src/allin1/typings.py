@@ -1,8 +1,11 @@
 import torch
+from os import PathLike
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 from numpy.typing import NDArray
+
+PathLike = Union[str, PathLike]
 
 
 @dataclass

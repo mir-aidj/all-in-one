@@ -31,6 +31,7 @@ dependencies = [
   "hydra-core",
   "omegaconf",
   "huggingface_hub",
+  "matplotlib",
 ]
 
 [project.urls]

@@ -1,12 +1,12 @@
 import numpy as np
 import torch
 
-from os import PathLike
 from typing import List, Union
 from tqdm import tqdm
 from .demix import demix
 from .spectrogram import extract_spectrograms
 from .models import load_pretrained_model
+from .visualize import visualize
 from .postprocessing import (
   postprocess_metrical_structure,
   postprocess_functional_structure,
@@ -19,12 +19,13 @@ from .helpers import (
   rmdir_if_empty,
   save_results,
 )
-from .utils import _mkpath
-from .typings import  AnalysisResult
+from .utils import mkpath
+from .typings import  AnalysisResult, PathLike
 
 def analyze(
   paths: Union[List[PathLike], PathLike],
   out_dir: PathLike = None,
+  plot_dir: PathLike = None,
   model: str = 'harmonix-all',
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
   include_activations: bool = False,
@@ -33,14 +34,15 @@ def analyze(
   spec_dir: PathLike = './spectrograms',
   keep_byproducts: bool = False,
 ):
-  # Clean up arguments.
+  return_list = True
   if not isinstance(paths, list):
+    return_list = False
     paths = [paths]
-  paths = [_mkpath(p) for p in paths]
+  paths = [mkpath(p) for p in paths]
   paths = expand_paths(paths)
   check_paths(paths)
-  demix_dir = _mkpath(demix_dir)
-  spec_dir = _mkpath(spec_dir)
+  demix_dir = mkpath(demix_dir)
+  spec_dir = mkpath(spec_dir)
   device = torch.device(device)
   print(f'=> Found {len(paths)} tracks to analyze.')
 
@@ -98,8 +100,11 @@ def analyze(
   if out_dir is not None:
     save_results(results, out_dir)
 
-  if len(paths) == 1:
+  if plot_dir is not None:
+    visualize(results, out_dir=plot_dir)
+    print(f'=> Plots are successfully saved to {plot_dir}')
+
+  if not return_list:
     return results[0]
-  else:
-    return results
+  return results
 

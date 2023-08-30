@@ -1,11 +1,11 @@
 import torch
 
-from os import PathLike
 from typing import Optional
 from omegaconf import OmegaConf
 from huggingface_hub import hf_hub_download
 from .allinone import AllInOne
 from .ensemble import Ensemble
+from ..typings import PathLike
 
 NAME_TO_FILE = {
   'harmonix-fold0': 'harmonix-fold0-0vra4ys2.pth',

@@ -2,12 +2,11 @@ import numpy as np
 import json
 import torch
 
-from os import PathLike
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Union
-from .utils import _mkpath, _compact_json_number_array
-from .typings import AllInOneOutput, AnalysisResult
+from .utils import mkpath, compact_json_number_array
+from .typings import AllInOneOutput, AnalysisResult, PathLike
 
 
 def compute_activations(logits: AllInOneOutput):
@@ -60,7 +59,7 @@ def save_results(
   if not isinstance(results, list):
     results = [results]
 
-  out_dir = _mkpath(out_dir)
+  out_dir = mkpath(out_dir)
   out_dir.mkdir(parents=True, exist_ok=True)
   for result in results:
     out_path = out_dir / result.path.with_suffix('.json').name
@@ -76,5 +75,5 @@ def save_results(
       np.save(str(out_path.with_suffix('.embed.npy')), embeddings)
 
     json_str = json.dumps(result, indent=2)
-    json_str = _compact_json_number_array(json_str)
+    json_str = compact_json_number_array(json_str)
     out_path.with_suffix('.json').write_text(json_str)

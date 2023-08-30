@@ -1,10 +1,10 @@
 import re
 
-from os import PathLike
 from pathlib import Path
+from .typings import PathLike
 
 
-def _compact_json_number_array(json_str: str):
+def compact_json_number_array(json_str: str):
   """Compact numbers (including floats) in JSON arrays to be on the same line."""
   return re.sub(
     r'(\[\n(?:\s*\d+(\.\d+)?,\n)+\s*\d+(\.\d+)?\n\s*\])',
@@ -13,5 +13,5 @@ def _compact_json_number_array(json_str: str):
   )
 
 
-def _mkpath(path: PathLike):
+def mkpath(path: PathLike):
   return Path(path).expanduser().resolve()

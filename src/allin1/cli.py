@@ -15,6 +15,10 @@ def make_parser():
                       help='Save frame-level embeddings (default: False)')
   parser.add_argument('-o', '--out-dir', type=Path, default=cwd / './structures',
                       help='Path to a directory to store analysis results (default: ./structures)')
+  parser.add_argument('-v', '--visualize', action='store_true',
+                      help='Visualize analysis results and save plots (default: False)')
+  parser.add_argument('-p', '--plot-dir', type=Path, default=cwd / './plots',
+                      help='Path to a directory to store plots (default: ./plots)')
   parser.add_argument('-m', '--model', type=str, default='harmonix-all',
                       help='Name of the pretrained model to use (default: harmonix-all)')
   parser.add_argument('-d', '--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu',
@@ -41,6 +45,7 @@ def main():
   analyze(
     paths=args.paths,
     out_dir=args.out_dir,
+    plot_dir=args.plot_dir if args.visualize else None,
     model=args.model,
     device=args.device,
     include_activations=args.activ,
