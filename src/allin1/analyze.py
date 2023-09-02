@@ -6,7 +6,8 @@ from tqdm import tqdm
 from .demix import demix
 from .spectrogram import extract_spectrograms
 from .models import load_pretrained_model
-from .visualize import visualize
+from .visualize import visualize as _visualize
+from .sonify import sonify as _sonify
 from .postprocessing import (
   postprocess_metrical_structure,
   postprocess_functional_structure,
@@ -20,20 +21,22 @@ from .helpers import (
   save_results,
 )
 from .utils import mkpath
-from .typings import  AnalysisResult, PathLike
+from .typings import AnalysisResult, PathLike
+
 
 def analyze(
-  paths: Union[List[PathLike], PathLike],
+  paths: Union[PathLike, List[PathLike]],
   out_dir: PathLike = None,
-  plot_dir: PathLike = None,
+  visualize: Union[bool, PathLike] = False,
+  sonify: Union[bool, PathLike] = False,
   model: str = 'harmonix-all',
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
   include_activations: bool = False,
   include_embeddings: bool = False,
-  demix_dir: PathLike = './demixed',
-  spec_dir: PathLike = './spectrograms',
+  demix_dir: PathLike = './demix',
+  spec_dir: PathLike = './spec',
   keep_byproducts: bool = False,
-):
+) -> Union[AnalysisResult, List[AnalysisResult]]:
   return_list = True
   if not isinstance(paths, list):
     return_list = False
@@ -85,6 +88,21 @@ def analyze(
       if include_embeddings:
         result.embeddings = logits.embeddings[0].cpu().numpy()
 
+  if out_dir is not None:
+    save_results(results, out_dir)
+
+  if visualize:
+    if visualize is True:
+      visualize = './viz'
+    _visualize(results, out_dir=visualize)
+    print(f'=> Plots are successfully saved to {visualize}')
+
+  if sonify:
+    if sonify is True:
+      sonify = './sonif'
+    _sonify(results, out_dir=sonify)
+    print(f'=> Sonified tracks are successfully saved to {sonify}')
+
   if not keep_byproducts:
     for path in demix_paths:
       for stem in ['bass', 'drums', 'other', 'vocals']:
@@ -97,14 +115,6 @@ def analyze(
       path.unlink(missing_ok=True)
     rmdir_if_empty(spec_dir)
 
-  if out_dir is not None:
-    save_results(results, out_dir)
-
-  if plot_dir is not None:
-    visualize(results, out_dir=plot_dir)
-    print(f'=> Plots are successfully saved to {plot_dir}')
-
   if not return_list:
     return results[0]
   return results
-

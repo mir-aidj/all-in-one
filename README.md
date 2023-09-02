@@ -68,9 +68,9 @@ Run:
 ```shell
 allin1 your_audio_file1.wav your_audio_file2.mp3
 ```
-Results are saved in `./structures:
+Results are saved in `./struct:
 ```shell
-./structures
+./struct
 └── your_audio_file1.json
 └── your_audio_file2.json
 ```
@@ -121,7 +121,7 @@ options:
   -a, --activ           Save frame-level raw activations from sigmoid and softmax (default: False)
   -e, --embed           Save frame-level embeddings (default: False)
   -o OUT_DIR, --out-dir OUT_DIR
-                        Path to a directory to store analysis results (default: ./structures)
+                        Path to a directory to store analysis results (default: ./struct)
   -m MODEL, --model MODEL
                         Name of the pretrained model to use (default: harmonix-all)
   -d DEVICE, --device DEVICE
@@ -129,8 +129,8 @@ options:
   -k, --keep-byproducts
                         Keep demixed audio files and spectrograms (default: False)
   --demix-dir DEMIX_DIR
-                        Path to a directory to store demixed tracks (default: ./demixed)
-  --spec-dir SPEC_DIR   Path to a directory to store spectrograms (default: ./spectrograms)
+                        Path to a directory to store demixed tracks (default: ./demix)
+  --spec-dir SPEC_DIR   Path to a directory to store spectrograms (default: ./spec)
 ```
 
 ### Python
@@ -169,7 +169,7 @@ Unlike CLI, it does not save the results to disk by default. You can save them a
 ```python
 result = allin1.analyze(
   'your_audio_file.wav',
-  out_dir='./structures',  # None by default
+  out_dir='./struct',  # None by default
 )
 ``` 
 The Python API `allin1.analyze()` offers the same options as the CLI:
@@ -181,8 +181,8 @@ def analyze(
   device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
   include_activations: bool = False,
   include_embeddings: bool = False,
-  demix_dir: PathLike = './demixed',
-  spec_dir: PathLike = './spectrograms',
+  demix_dir: PathLike = './demix',
+  spec_dir: PathLike = './spec',
   keep_byproducts: bool = False,
 ): ...
 ```
@@ -218,14 +218,14 @@ $ allin1 --activ your_audio_file.wav
 ```
 You can find the activations in the `.npz` file:
 ```shell
-./structures
+./struct
 └── your_audio_file1.json
 └── your_audio_file1.activ.npz
 ```
 To load the activations in Python:
 ```python
 >>> import numpy as np
->>> activ = np.load('./structures/your_audio_file1.activ.npz')
+>>> activ = np.load('./struct/your_audio_file1.activ.npz')
 >>> activ.files
 ['beat', 'downbeat', 'segment', 'label']
 >>> beat_activations = activ['beat']
@@ -262,7 +262,7 @@ $ allin1 --embed your_audio_file.wav
 ```
 You can find the embeddings in the `.npy` file:
 ```shell
-./structures
+./struct
 └── your_audio_file1.json
 └── your_audio_file1.embed.npy
 ```

@@ -25,7 +25,7 @@ HARMONIX_COLORS = {
 def visualize(
   results: Union[AnalysisResult, List[AnalysisResult]],
   out_dir: PathLike = None,
-):
+) -> Union[plt.Figure, List[plt.Figure]]:
   return_list = True
   if not isinstance(results, list):
     return_list = False
@@ -40,7 +40,6 @@ def visualize(
     for result, fig in zip(results, figs):
       fig.savefig(out_dir / f'{result.path.stem}.pdf', bbox_inches='tight')
 
-  # return the first figure if results was not a list
   if not return_list:
     return figs[0]
   return figs

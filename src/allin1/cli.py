@@ -13,22 +13,22 @@ def make_parser():
                       help='Save frame-level raw activations from sigmoid and softmax (default: False)')
   parser.add_argument('-e', '--embed', action='store_true',
                       help='Save frame-level embeddings (default: False)')
-  parser.add_argument('-o', '--out-dir', type=Path, default=cwd / './structures',
-                      help='Path to a directory to store analysis results (default: ./structures)')
-  parser.add_argument('-v', '--visualize', action='store_true',
-                      help='Visualize analysis results and save plots (default: False)')
-  parser.add_argument('-p', '--plot-dir', type=Path, default=cwd / './plots',
-                      help='Path to a directory to store plots (default: ./plots)')
+  parser.add_argument('-o', '--out-dir', type=Path, default=cwd / './struct',
+                      help='Path to a directory to store analysis results (default: ./struct)')
+  parser.add_argument('-v', '--visualize', action='store', nargs='?', const=True, default=False, type=str,
+                      help='Save visualizations (default: False, True to save to ./viz, or specify a path)')
+  parser.add_argument('-s', '--sonify', action='store', nargs='?', const=True, default=False, type=str,
+                      help='Save sonifications (default: False, True to save to ./sonif, or specify a path)')
   parser.add_argument('-m', '--model', type=str, default='harmonix-all',
                       help='Name of the pretrained model to use (default: harmonix-all)')
   parser.add_argument('-d', '--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu',
                       help='Device to use (default: cuda if available else cpu)')
   parser.add_argument('-k', '--keep-byproducts', action='store_true',
                       help='Keep demixed audio files and spectrograms (default: False)')
-  parser.add_argument('--demix-dir', type=Path, default=cwd / 'demixed',
-                      help='Path to a directory to store demixed tracks (default: ./demixed)')
-  parser.add_argument('--spec-dir', type=Path, default=cwd / 'spectrograms',
-                      help='Path to a directory to store spectrograms (default: ./spectrograms)')
+  parser.add_argument('--demix-dir', type=Path, default=cwd / 'demix',
+                      help='Path to a directory to store demixed tracks (default: ./demix)')
+  parser.add_argument('--spec-dir', type=Path, default=cwd / 'spec',
+                      help='Path to a directory to store spectrograms (default: ./spec)')
 
   return parser
 
@@ -45,7 +45,8 @@ def main():
   analyze(
     paths=args.paths,
     out_dir=args.out_dir,
-    plot_dir=args.plot_dir if args.visualize else None,
+    visualize=args.visualize,
+    sonify=args.sonify,
     model=args.model,
     device=args.device,
     include_activations=args.activ,

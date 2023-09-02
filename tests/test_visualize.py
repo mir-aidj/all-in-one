@@ -19,6 +19,6 @@ def test_visualize_save():
   )
   allin1.visualize(
     result,
-    out_dir='./plots',
+    out_dir='./viz',
   )
-  assert mkpath('./plots/test.pdf').is_file()
+  assert mkpath('./viz/test.pdf').is_file()

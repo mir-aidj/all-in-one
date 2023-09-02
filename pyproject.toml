@@ -26,6 +26,7 @@ classifiers = [
 dependencies = [
   "numpy",
   "librosa",
+  "soundfile",
   "natten; platform_system == 'Darwin'",
   "demucs",
   "hydra-core",

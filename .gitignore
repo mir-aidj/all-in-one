@@ -1,9 +1,12 @@
 *.mp3
 *.wav
-demixed/
-spectrograms/
-structures/
-plots/
+
+demix/
+spec/
+struct/
+viz/
+sonif/
+
 .idea/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,macos,linux
