@@ -1,8 +1,10 @@
 import numpy as np
-import soundfile as sf
 import librosa
+import demucs.separate
 
 from typing import Union, List, Tuple
+
+import torch
 from numpy.typing import NDArray
 from .typings import AnalysisResult, PathLike, Segment
 from .utils import mkpath
@@ -23,11 +25,16 @@ def sonify(
     out_dir = mkpath(out_dir)
     out_dir.mkdir(exist_ok=True, parents=True)
     for r, (y, sr) in zip(results, sonifs):
-      sf.write(
-        file=out_dir / f'{r.path.stem}.wav',
-        data=y.T,
+      demucs.separate.save_audio(
+        wav=torch.from_numpy(y),
+        path=out_dir / f'{r.path.stem}.sonif{r.path.suffix}',
         samplerate=sr,
       )
+      # sf.write(
+      #   file=out_dir / f'{r.path.stem}.wav',
+      #   data=y.T,
+      #   samplerate=sr,
+      # )
 
   if not return_list:
     return sonifs[0]
@@ -35,7 +42,9 @@ def sonify(
 
 
 def _sonify(result: AnalysisResult) -> Tuple[NDArray, float]:
-  y, sr = librosa.load(result.path, sr=None, mono=False)
+  sr = 44100
+  y = demucs.separate.load_track(result.path, 2, sr).numpy()
+  # y, sr = librosa.load(result.path, sr=None, mono=False)
 
   length = y.shape[-1]
   metronome = _sonify_metronome(result, length, sr)

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.gridspec as gridspec
 import librosa.feature
+import demucs.separate
 
 from typing import Union, List, Mapping
 
@@ -53,7 +54,9 @@ def _plot(
   if colors is None:
     colors = HARMONIX_COLORS
 
-  y, sr = librosa.load(result.path, sr=None, mono=True)
+  sr = 44100
+  y = demucs.separate.load_track(result.path, 2, sr).numpy()
+  # y, sr = librosa.load(result.path, sr=None, mono=True)
   rms = librosa.feature.rms(y=y, frame_length=4096, hop_length=1024)[0]
 
   fig = plt.figure(figsize=(12, 2))
