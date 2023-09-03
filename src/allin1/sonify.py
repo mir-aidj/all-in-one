@@ -104,7 +104,7 @@ def _sonify_boundaries(
   click_freqs = click_freqs[click_times > 0]
   click_times = click_times[click_times > 0]
 
-  y = np.zeros((length,))
+  y = np.zeros((length,), dtype='float32')
   for t, f in zip(click_times, click_freqs):
     click = _synthesize_click(sr, f)
     y[int(t * sr):int(t * sr) + len(click)] += click
