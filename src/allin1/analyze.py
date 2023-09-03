@@ -36,7 +36,47 @@ def analyze(
   demix_dir: PathLike = './demix',
   spec_dir: PathLike = './spec',
   keep_byproducts: bool = False,
+  multiprocess: bool = True,
 ) -> Union[AnalysisResult, List[AnalysisResult]]:
+  """
+  Analyzes the provided audio files and returns the analysis results.
+
+  Parameters
+  ----------
+  paths : Union[PathLike, List[PathLike]]
+      List of paths or a single path to the audio files to be analyzed.
+  out_dir : PathLike, optional
+      Path to the directory where the analysis results will be saved. By default, the results will not be saved.
+  visualize : Union[bool, PathLike], optional
+      Whether to visualize the analysis results or not. If a path is provided, the visualizations will be saved in that
+      directory. Default is False. If True, the visualizations will be saved in './viz'.
+  sonify : Union[bool, PathLike], optional
+      Whether to sonify the analysis results or not. If a path is provided, the sonifications will be saved in that
+      directory. Default is False. If True, the sonifications will be saved in './sonif'.
+  model : str, optional
+      Name of the pre-trained model to be used for the analysis. Default is 'harmonix-all'. Please refer to the
+      documentation for the available models.
+  device : str, optional
+      Device to be used for computation. Default is 'cuda' if available, otherwise 'cpu'.
+  include_activations : bool, optional
+      Whether to include activations in the analysis results or not.
+  include_embeddings : bool, optional
+      Whether to include embeddings in the analysis results or not.
+  demix_dir : PathLike, optional
+      Path to the directory where the source-separated audio will be saved. Default is './demix'.
+  spec_dir : PathLike, optional
+      Path to the directory where the spectrograms will be saved. Default is './spec'.
+  keep_byproducts : bool, optional
+      Whether to keep the source-separated audio and spectrograms or not. Default is False.
+  multi : bool, optional
+      Whether to use multiprocessing for extracting spectrograms. Default is True.
+
+  Returns
+  -------
+  Union[AnalysisResult, List[AnalysisResult]]
+      Analysis results for the provided audio files.
+  """
+
   return_list = True
   if not isinstance(paths, list):
     return_list = False
@@ -51,7 +91,7 @@ def analyze(
 
   demix_paths = demix(paths, demix_dir, device)
 
-  spec_paths = extract_spectrograms(demix_paths, spec_dir)
+  spec_paths = extract_spectrograms(demix_paths, spec_dir, multiprocess)
 
   model = load_pretrained_model(
     model_name=model,

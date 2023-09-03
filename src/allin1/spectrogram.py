@@ -9,7 +9,7 @@ from madmom.processors import SequentialProcessor
 from madmom.audio.spectrogram import FilteredSpectrogramProcessor, LogarithmicSpectrogramProcessor
 
 
-def extract_spectrograms(demix_paths: List[Path], spec_dir: Path):
+def extract_spectrograms(demix_paths: List[Path], spec_dir: Path, multiprocess: bool = True):
   todos = []
   spec_paths = []
   for src in demix_paths:
@@ -39,13 +39,20 @@ def extract_spectrograms(demix_paths: List[Path], spec_dir: Path):
     processor = SequentialProcessor([frames, stft, filt, spec])
 
     # Process all tracks using multiprocessing.
-    with Pool() as pool:
-      iterator = pool.imap(_extract_spectrogram, [
-        (src, dst, processor)
-        for src, dst in todos
-      ])
-      for _ in tqdm(iterator, total=len(todos), desc='Extracting spectrograms'):
-        pass
+    if multiprocess:
+      pool = Pool()
+      map = pool.imap
+
+    iterator = map(_extract_spectrogram, [
+      (src, dst, processor)
+      for src, dst in todos
+    ])
+    for _ in tqdm(iterator, total=len(todos), desc='Extracting spectrograms'):
+      pass
+
+    if multiprocess:
+      pool.close()
+      pool.join()
 
   return spec_paths
 
