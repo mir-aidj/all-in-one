@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 from numpy.typing import NDArray
-from .utils import mkpath
 
 PathLike = Union[str, PathLike]
 
@@ -41,6 +40,8 @@ class AnalysisResult:
 
   @staticmethod
   def from_json(path: PathLike):
+    from .utils import mkpath
+
     path = mkpath(path)
     with open(path, 'r') as f:
       data = json.load(f)

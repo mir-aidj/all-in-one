@@ -41,16 +41,19 @@ def extract_spectrograms(demix_paths: List[Path], spec_dir: Path, multiprocess: 
     # Process all tracks using multiprocessing.
     if multiprocess:
       pool = Pool()
-      map = pool.imap
+      map_fn = pool.imap
+    else:
+      pool = None
+      map_fn = map
 
-    iterator = map(_extract_spectrogram, [
+    iterator = map_fn(_extract_spectrogram, [
       (src, dst, processor)
       for src, dst in todos
     ])
     for _ in tqdm(iterator, total=len(todos), desc='Extracting spectrograms'):
       pass
 
-    if multiprocess:
+    if pool:
       pool.close()
       pool.join()
 

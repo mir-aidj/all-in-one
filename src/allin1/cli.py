@@ -9,16 +9,20 @@ def make_parser():
   cwd = Path.cwd()
   parser = argparse.ArgumentParser()
   parser.add_argument('paths', nargs='+', type=Path, default=[], help='Path to tracks')
+  parser.add_argument('-o', '--out-dir', type=Path, default=cwd / './struct',
+                      help='Path to a directory to store analysis results (default: ./struct)')
+  parser.add_argument('-v', '--visualize', action='store_true', default=False,
+                      help='Save visualizations (default: False)')
+  parser.add_argument('--viz-dir', type=str, default=cwd / 'viz',
+                      help='Directory to save visualizations if -v is provided (default: ./viz)')
+  parser.add_argument('-s', '--sonify', action='store_true', default=False,
+                      help='Save sonifications (default: False)')
+  parser.add_argument('--sonif-dir', type=str, default=cwd / 'sonif',
+                      help='Directory to save sonifications if -s is provided (default: ./sonif)')
   parser.add_argument('-a', '--activ', action='store_true',
                       help='Save frame-level raw activations from sigmoid and softmax (default: False)')
   parser.add_argument('-e', '--embed', action='store_true',
                       help='Save frame-level embeddings (default: False)')
-  parser.add_argument('-o', '--out-dir', type=Path, default=cwd / './struct',
-                      help='Path to a directory to store analysis results (default: ./struct)')
-  parser.add_argument('-v', '--visualize', action='store', nargs='?', const=True, default=False, type=str,
-                      help='Save visualizations (default: False, True to save to ./viz, or specify a path)')
-  parser.add_argument('-s', '--sonify', action='store', nargs='?', const=True, default=False, type=str,
-                      help='Save sonifications (default: False, True to save to ./sonif, or specify a path)')
   parser.add_argument('-m', '--model', type=str, default='harmonix-all',
                       help='Name of the pretrained model to use (default: harmonix-all)')
   parser.add_argument('-d', '--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu',
@@ -45,8 +49,8 @@ def main():
   analyze(
     paths=args.paths,
     out_dir=args.out_dir,
-    visualize=args.visualize,
-    sonify=args.sonify,
+    visualize=args.viz_dir if args.visualize else False,
+    sonify=args.sonif_dir if args.sonify else False,
     model=args.model,
     device=args.device,
     include_activations=args.activ,

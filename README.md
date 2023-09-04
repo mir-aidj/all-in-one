@@ -1,4 +1,8 @@
 # All-In-One Music Structure Analyzer
+
+[![Visual Demo](https://img.shields.io/badge/Visual-Demo-8A2BE2)](https://taejun.kim/music-dissector/)
+[![arXiv](https://img.shields.io/badge/arXiv-2307.16425-B31B1B)](http://arxiv.org/abs/2307.16425/)
+[![Hugging Face Space](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-f9f107)](https://huggingface.co/spaces/taejunkim/all-in-one/)
 [![PyPI - Version](https://img.shields.io/pypi/v/allin1.svg)](https://pypi.org/project/allin1)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/allin1.svg)](https://pypi.org/project/allin1)
 
@@ -6,8 +10,8 @@ This package provides models for music structure analysis, predicting:
 1. Tempo (BPM)
 2. Beats
 3. Downbeats
-4. Section boundaries
-5. Section labels (e.g., intro, verse, chorus, bridge, outro)
+4. Functional segment boundaries
+5. Functional segment labels (e.g., intro, verse, chorus, bridge, outro)
 
 
 -----
@@ -16,7 +20,9 @@ This package provides models for music structure analysis, predicting:
 **Table of Contents**
 
 - [Installation](#installation)
-- [Usage](#usage)
+- [Usage for CLI](#usage-for-cli)
+- [Usage for Python](#usage-for-python)
+- [Visualization & Sonification](#visualization--sonification)
 - [Available Models](#available-models)
 - [Speed](#speed)
 - [Advanced Usage for Research](#advanced-usage-for-research)
@@ -61,20 +67,20 @@ For macOS:
 brew install ffmpeg
 ```
 
-## Usage
 
-### CLI
-Run:
+## Usage for CLI
+
+To analyze audio files:
 ```shell
 allin1 your_audio_file1.wav your_audio_file2.mp3
 ```
-Results are saved in `./struct:
+Results will be saved in the `./struct` directory by default:
 ```shell
 ./struct
 └── your_audio_file1.json
 └── your_audio_file2.json
 ```
-And a JSON analysis result has:
+The analysis results will be saved in JSON format:
 ```json
 {
   "path": "/path/to/your_audio_file.wav",
@@ -107,21 +113,28 @@ And a JSON analysis result has:
   ]
 }
 ```
-Available options:
+All available options are as follows:
 ```shell
-$ allin1 --help
+$ allin1 -h
 
-usage: allin1 [-h] [-a] [-e] [-o OUT_DIR] [-m MODEL] [-d DEVICE] [-k] [--demix-dir DEMIX_DIR] [--spec-dir SPEC_DIR] paths [paths ...]
+usage: allin1 [-h] [-o OUT_DIR] [-v] [--viz-dir VIZ_DIR] [-s] [--sonif-dir SONIF_DIR] [-a] [-e] [-m MODEL] [-d DEVICE] [-k]
+              [--demix-dir DEMIX_DIR] [--spec-dir SPEC_DIR]
+              paths [paths ...]
 
 positional arguments:
   paths                 Path to tracks
 
 options:
   -h, --help            show this help message and exit
-  -a, --activ           Save frame-level raw activations from sigmoid and softmax (default: False)
-  -e, --embed           Save frame-level embeddings (default: False)
   -o OUT_DIR, --out-dir OUT_DIR
                         Path to a directory to store analysis results (default: ./struct)
+  -v, --visualize       Save visualizations (default: False)
+  --viz-dir VIZ_DIR     Directory to save visualizations if -v is provided (default: ./viz)
+  -s, --sonify          Save sonifications (default: False)
+  --sonif-dir SONIF_DIR
+                        Directory to save sonifications if -s is provided (default: ./sonif)
+  -a, --activ           Save frame-level raw activations from sigmoid and softmax (default: False)
+  -e, --embed           Save frame-level embeddings (default: False)
   -m MODEL, --model MODEL
                         Name of the pretrained model to use (default: harmonix-all)
   -d DEVICE, --device DEVICE
@@ -133,7 +146,10 @@ options:
   --spec-dir SPEC_DIR   Path to a directory to store spectrograms (default: ./spec)
 ```
 
-### Python
+## Usage for Python
+
+### `analyze()`
+Analyzes the provided audio files and returns the analysis results.
 
 ```python
 import allin1
@@ -169,23 +185,130 @@ Unlike CLI, it does not save the results to disk by default. You can save them a
 ```python
 result = allin1.analyze(
   'your_audio_file.wav',
-  out_dir='./struct',  # None by default
+  out_dir='./struct',
 )
-``` 
-The Python API `allin1.analyze()` offers the same options as the CLI:
-```python
-def analyze(
-  paths: PathLike | List[PathLike],
-  out_dir: PathLike = None,
-  model: str = 'harmonix-all',
-  device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
-  include_activations: bool = False,
-  include_embeddings: bool = False,
-  demix_dir: PathLike = './demix',
-  spec_dir: PathLike = './spec',
-  keep_byproducts: bool = False,
-): ...
 ```
+
+#### Parameters:
+
+- `paths` : `Union[PathLike, List[PathLike]]`  
+List of paths or a single path to the audio files to be analyzed.
+  
+- `out_dir` : `PathLike` (optional)  
+Path to the directory where the analysis results will be saved. By default, the results will not be saved.
+  
+- `visualize` : `Union[bool, PathLike]` (optional)  
+Whether to visualize the analysis results or not. If a path is provided, the visualizations will be saved in that directory. Default is False. If True, the visualizations will be saved in './viz'.
+  
+- `sonify` : `Union[bool, PathLike]` (optional)  
+Whether to sonify the analysis results or not. If a path is provided, the sonifications will be saved in that directory. Default is False. If True, the sonifications will be saved in './sonif'.
+  
+- `model` : `str` (optional)  
+Name of the pre-trained model to be used for the analysis. Default is 'harmonix-all'. Please refer to the documentation for the available models.
+  
+- `device` : `str` (optional)  
+Device to be used for computation. Default is 'cuda' if available, otherwise 'cpu'.
+  
+- `include_activations` : `bool` (optional)  
+Whether to include activations in the analysis results or not.
+  
+- `include_embeddings` : `bool` (optional)  
+Whether to include embeddings in the analysis results or not.
+  
+- `demix_dir` : `PathLike` (optional)  
+Path to the directory where the source-separated audio will be saved. Default is './demix'.
+  
+- `spec_dir` : `PathLike` (optional)  
+Path to the directory where the spectrograms will be saved. Default is './spec'.
+  
+- `keep_byproducts` : `bool` (optional)  
+Whether to keep the source-separated audio and spectrograms or not. Default is False.
+  
+- `multiprocess` : `bool` (optional)  
+Whether to use multiprocessing for extracting spectrograms. Default is True.
+
+#### Returns:
+
+- `Union[AnalysisResult, List[AnalysisResult]]`  
+Analysis results for the provided audio files.
+
+
+### `load_result()`
+
+Loads the analysis results from the disk.
+
+```python
+result = allin1.load_result('./struct/24k_Magic.json')
+```
+
+
+### `visualize()`
+
+Visualizes the analysis results.
+
+```python
+fig = allin1.visualize(result)
+fig.show()
+```
+
+#### Parameters:
+
+- `result` : `Union[AnalysisResult, List[AnalysisResult]]`  
+List of analysis results or a single analysis result to be visualized.
+
+- `out_dir` : `PathLike` (optional)  
+Path to the directory where the visualizations will be saved. By default, the visualizations will not be saved.
+
+#### Returns:
+
+- `Union[Figure, List[Figure]]`
+List of figures or a single figure containing the visualizations. `Figure` is a class from `matplotlib.pyplot`.
+
+
+### `sonify()`
+
+Sonifies the analysis results.
+It will mix metronome clicks for beats and downbeats, and event sounds for segment boundaries
+to the original audio file.
+
+```python
+y, sr = allin1.sonify(result)
+# y: sonified audio with shape (channels=2, samples)
+# sr: sampling rate (=44100)
+```
+
+#### Parameters:
+
+- `result` : `Union[AnalysisResult, List[AnalysisResult]]`  
+List of analysis results or a single analysis result to be sonified.
+- `out_dir` : `PathLike` (optional)  
+Path to the directory where the sonifications will be saved. By default, the sonifications will not be saved.
+
+#### Returns:
+
+- `Union[Tuple[NDArray, float], List[Tuple[NDArray, float]]]`  
+List of tuples or a single tuple containing the sonified audio and the sampling rate.
+
+
+## Visualization & Sonification
+This package provides a simple visualization (`-v` or `--visualize`) and sonification (`-s` or `--sonify`) function for the analysis results.
+```shell
+allin1 -v -s your_audio_file.wav
+```
+The visualizations will be saved in the `./viz` directory by default:
+```shell
+./viz
+└── your_audio_file.pdf
+```
+The sonifications will be saved in the `./sonif` directory by default:
+```shell
+./sonif
+└── your_audio_file.sonif.wav
+```
+For example, a visualization looks like this:
+![Visualization](./assets/viz.png)
+
+You can try it at [Hugging Face Space](https://huggingface.co/spaces/taejunkim/all-in-one).
 
 
 ## Available Models

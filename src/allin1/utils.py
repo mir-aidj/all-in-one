@@ -1,7 +1,7 @@
 import re
 
 from pathlib import Path
-from .typings import PathLike
+from .typings import PathLike, AnalysisResult
 
 
 def compact_json_number_array(json_str: str):
@@ -15,3 +15,9 @@ def compact_json_number_array(json_str: str):
 
 def mkpath(path: PathLike):
   return Path(path).expanduser().resolve()
+
+
+def load_result(path: PathLike) -> AnalysisResult:
+  path = mkpath(path)
+  result = AnalysisResult.from_json(path)
+  return result
