@@ -148,6 +148,12 @@ options:
 
 ## Usage for Python
 
+Available functions:
+- [`analyze()`](#analyze)
+- [`load_result()`](#load_result)
+- [`visualize()`](#visualize)
+- [`sonify()`](#sonify)
+
 ### `analyze()`
 Analyzes the provided audio files and returns the analysis results.
 
