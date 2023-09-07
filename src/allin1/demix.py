@@ -1,6 +1,8 @@
 import sys
 import subprocess
 import torch
+import os
+NUM_CPUS = os.cpu_count()
 
 from pathlib import Path
 from typing import List, Union
@@ -33,6 +35,7 @@ def demix(paths: List[Path], demix_dir: Path, device: Union[str, torch.device]):
         '--out', demix_dir.as_posix(),
         '--name', 'htdemucs',
         '--device', str(device),
+        '-j', str(NUM_CPUS),
         *[path.as_posix() for path in todos],
       ],
       check=True,
