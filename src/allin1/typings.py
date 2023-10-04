@@ -39,7 +39,11 @@ class AnalysisResult:
   embeddings: Optional[NDArray] = None
 
   @staticmethod
-  def from_json(path: PathLike):
+  def from_json(
+    path: PathLike,
+    load_activations: bool = True,
+    load_embeddings: bool = True,
+  ):
     from .utils import mkpath
 
     path = mkpath(path)
@@ -55,12 +59,15 @@ class AnalysisResult:
       segments=[Segment(**seg) for seg in data['segments']],
     )
 
-    activ_path = path.with_suffix('.activ.npz')
-    embed_path = path.with_suffix('.embed.npy')
-    if activ_path.is_file():
-      activs = np.load(activ_path)
-      result.activations = {key: activs[key] for key in activs.files}
-    if embed_path.is_file():
-      result.embeddings = np.load(embed_path)
+    if load_activations:
+      activ_path = path.with_suffix('.activ.npz')
+      if activ_path.is_file():
+        activs = np.load(activ_path)
+        result.activations = {key: activs[key] for key in activs.files}
+
+    if load_embeddings:
+      embed_path = path.with_suffix('.embed.npy')
+      if embed_path.is_file():
+        result.embeddings = np.load(embed_path)
 
     return result

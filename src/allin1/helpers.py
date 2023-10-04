@@ -4,10 +4,49 @@ import torch
 
 from dataclasses import asdict
 from pathlib import Path
+from glob import glob
 from typing import List, Union
 from .utils import mkpath, compact_json_number_array
 from .typings import AllInOneOutput, AnalysisResult, PathLike
+from .postprocessing import (
+  postprocess_metrical_structure,
+  postprocess_functional_structure,
+  estimate_tempo_from_beats,
+)
 
+
+def run_inference(
+  path: Path,
+  spec_path: Path,
+  model: torch.nn.Module,
+  device: str,
+  include_activations: bool,
+  include_embeddings: bool,
+) -> AnalysisResult:
+  spec = np.load(spec_path)
+  spec = torch.from_numpy(spec).unsqueeze(0).to(device)
+
+  logits = model(spec)
+
+  metrical_structure = postprocess_metrical_structure(logits, model.cfg)
+  functional_structure = postprocess_functional_structure(logits, model.cfg)
+  bpm = estimate_tempo_from_beats(metrical_structure['beats'])
+
+  result = AnalysisResult(
+    path=path,
+    bpm=bpm,
+    segments=functional_structure,
+    **metrical_structure,
+  )
+
+  if include_activations:
+    activations = compute_activations(logits)
+    result.activations = activations
+
+  if include_embeddings:
+    result.embeddings = logits.embeddings[0].cpu().numpy()
+
+  return result
 
 def compute_activations(logits: AllInOneOutput):
   activations_beat = torch.sigmoid(logits.logits_beat[0]).cpu().numpy()
@@ -26,7 +65,7 @@ def expand_paths(paths: List[Path]):
   expanded_paths = set()
   for path in paths:
     if '*' in str(path) or '?' in str(path):
-      matches = list(path.parent.glob(path.name))
+      matches = [Path(p) for p in glob(str(path))]
       if not matches:
         raise FileNotFoundError(f'Could not find any files matching {path}')
       expanded_paths.update(matches)

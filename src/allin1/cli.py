@@ -33,6 +33,10 @@ def make_parser():
                       help='Path to a directory to store demixed tracks (default: ./demix)')
   parser.add_argument('--spec-dir', type=Path, default=cwd / 'spec',
                       help='Path to a directory to store spectrograms (default: ./spec)')
+  parser.add_argument('--overwrite', action='store_true', default=False,
+                      help='Overwrite existing files (default: False)')
+  parser.add_argument('--no-multiprocess', action='store_true', default=False,
+                      help='Disable multiprocessing (default: False)')
 
   return parser
 
@@ -58,6 +62,8 @@ def main():
     demix_dir=args.demix_dir,
     spec_dir=args.spec_dir,
     keep_byproducts=args.keep_byproducts,
+    overwrite=args.overwrite,
+    multiprocess=not args.no_multiprocess,
   )
 
   print(f'=> Analysis results are successfully saved to {args.out_dir}')

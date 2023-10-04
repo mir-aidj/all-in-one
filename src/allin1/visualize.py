@@ -4,7 +4,10 @@ import matplotlib.gridspec as gridspec
 import librosa.feature
 import demucs.separate
 
+from functools import partial
+from multiprocessing import Pool
 from typing import Union, List, Mapping
+from tqdm import tqdm
 
 from .typings import AnalysisResult, PathLike
 from .utils import mkpath
@@ -26,20 +29,25 @@ HARMONIX_COLORS = {
 def visualize(
   results: Union[AnalysisResult, List[AnalysisResult]],
   out_dir: PathLike = None,
+  multiprocess: bool = True,
 ) -> Union[plt.Figure, List[plt.Figure]]:
   return_list = True
   if not isinstance(results, list):
     return_list = False
     results = [results]
 
-  figs = [_plot(r) for r in results]
+  plot_fn = partial(_plot, out_dir=out_dir)
+  if multiprocess:
+    pool = Pool()
+    iterator = pool.imap_unordered(plot_fn, results)
+  else:
+    iterator = map(plot_fn, results)
 
-  # Save figures to out_dir
-  if out_dir is not None:
-    out_dir = mkpath(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    for result, fig in zip(results, figs):
-      fig.savefig(out_dir / f'{result.path.stem}.pdf', bbox_inches='tight')
+  figs = [fig for fig in tqdm(iterator, desc='Visualizing results', total=len(results))]
+
+  if multiprocess:
+    pool.close()
+    pool.join()
 
   if not return_list:
     return figs[0]
@@ -48,6 +56,7 @@ def visualize(
 
 def _plot(
   result: AnalysisResult,
+  out_dir: PathLike = None,
   colors: Mapping[str, int] = None,
   color_map: str = 'viridis',
 ):
@@ -102,9 +111,15 @@ def _plot(
   ax1.set_yticks([])
 
   # set title
-  ax0.set_title(result.path.name)
+  ax0.set_title(result.path.name, parse_math=False)
   fig.tight_layout()
   fig.subplots_adjust(hspace=0)
+
+  # Save figures to out_dir
+  if out_dir is not None:
+    out_dir = mkpath(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_dir / f'{result.path.stem}.pdf', bbox_inches='tight')
 
   return fig
 

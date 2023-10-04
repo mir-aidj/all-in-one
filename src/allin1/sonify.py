@@ -1,10 +1,13 @@
 import numpy as np
+
+import torch
 import librosa
 import demucs.separate
 
+from functools import partial
+from multiprocessing import Pool
 from typing import Union, List, Tuple
-
-import torch
+from tqdm import tqdm
 from numpy.typing import NDArray
 from .typings import AnalysisResult, PathLike, Segment
 from .utils import mkpath
@@ -13,35 +16,35 @@ from .utils import mkpath
 def sonify(
   results: Union[AnalysisResult, List[AnalysisResult]],
   out_dir: PathLike = None,
+  multiprocess: bool = True,
 ) -> Union[Tuple[NDArray, float], List[Tuple[NDArray, float]]]:
   return_list = True
   if not isinstance(results, list):
     return_list = False
     results = [results]
 
-  sonifs = [_sonify(r) for r in results]
+  sonif_fn = partial(_sonify, out_dir=out_dir)
+  if multiprocess:
+    pool = Pool()
+    iterator = pool.imap_unordered(sonif_fn, results)
+  else:
+    iterator = map(sonif_fn, results)
 
-  if out_dir is not None:
-    out_dir = mkpath(out_dir)
-    out_dir.mkdir(exist_ok=True, parents=True)
-    for r, (y, sr) in zip(results, sonifs):
-      demucs.separate.save_audio(
-        wav=torch.from_numpy(y),
-        path=out_dir / f'{r.path.stem}.sonif{r.path.suffix}',
-        samplerate=sr,
-      )
-      # sf.write(
-      #   file=out_dir / f'{r.path.stem}.wav',
-      #   data=y.T,
-      #   samplerate=sr,
-      # )
+  sonifs = [sonif for sonif in tqdm(iterator, desc='Sonifying results', total=len(results))]
+
+  if multiprocess:
+    pool.close()
+    pool.join()
 
   if not return_list:
     return sonifs[0]
   return sonifs
 
 
-def _sonify(result: AnalysisResult) -> Tuple[NDArray, float]:
+def _sonify(
+  result: AnalysisResult,
+  out_dir: PathLike = None,
+) -> Tuple[NDArray, float]:
   sr = 44100
   y = demucs.separate.load_track(result.path, 2, sr).numpy()
   # y, sr = librosa.load(result.path, sr=None, mono=False)
@@ -52,6 +55,16 @@ def _sonify(result: AnalysisResult) -> Tuple[NDArray, float]:
 
   mixed = y + metronome + boundaries
   mixed = np.clip(mixed, -1, 1)
+
+  if out_dir is not None:
+    out_dir = mkpath(out_dir)
+    out_dir.mkdir(exist_ok=True, parents=True)
+
+    demucs.separate.save_audio(
+      wav=torch.from_numpy(mixed),
+      path=out_dir / f'{result.path.stem}.sonif{result.path.suffix}',
+      samplerate=sr,
+    )
 
   return mixed, sr
 
@@ -107,14 +120,26 @@ def _sonify_boundaries(
   y = np.zeros((length,), dtype='float32')
   for t, f in zip(click_times, click_freqs):
     click = _synthesize_click(sr, f)
-    y[int(t * sr):int(t * sr) + len(click)] += click
+
+    click_start = int(t * sr)
+    click_end = click_start + len(click)
+    if click_end > length:
+      click = click[:length - click_start]
+
+    y[click_start:click_start + len(click)] += click
 
   for segment in segments:
     if segment.label in ['start', 'end']:
       continue
+
     drop = _synthesize_drop(sr)
-    drop_time = segment.start
-    y[int(drop_time * sr):int(drop_time * sr) + len(drop)] += drop
+
+    drop_start = int(segment.start * sr)
+    drop_end = drop_start + len(drop)
+    if drop_end > length:
+      drop = drop[:length - drop_start]
+
+    y[drop_start:drop_start + len(drop)] += drop
 
   return y
 

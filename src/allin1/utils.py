@@ -17,7 +17,15 @@ def mkpath(path: PathLike):
   return Path(path).expanduser().resolve()
 
 
-def load_result(path: PathLike) -> AnalysisResult:
+def load_result(
+  path: PathLike,
+  load_activations: bool = True,
+  load_embeddings: bool = True,
+) -> AnalysisResult:
   path = mkpath(path)
-  result = AnalysisResult.from_json(path)
+  result = AnalysisResult.from_json(
+    path,
+    load_activations=load_activations,
+    load_embeddings=load_embeddings,
+  )
   return result

@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 
 from typing import List, Union
@@ -8,19 +7,14 @@ from .spectrogram import extract_spectrograms
 from .models import load_pretrained_model
 from .visualize import visualize as _visualize
 from .sonify import sonify as _sonify
-from .postprocessing import (
-  postprocess_metrical_structure,
-  postprocess_functional_structure,
-  estimate_tempo_from_beats,
-)
 from .helpers import (
-  compute_activations,
+  run_inference,
   expand_paths,
   check_paths,
   rmdir_if_empty,
   save_results,
 )
-from .utils import mkpath
+from .utils import mkpath, load_result
 from .typings import AnalysisResult, PathLike
 
 
@@ -36,6 +30,7 @@ def analyze(
   demix_dir: PathLike = './demix',
   spec_dir: PathLike = './spec',
   keep_byproducts: bool = False,
+  overwrite: bool = False,
   multiprocess: bool = True,
 ) -> Union[AnalysisResult, List[AnalysisResult]]:
   """
@@ -68,8 +63,10 @@ def analyze(
       Path to the directory where the spectrograms will be saved. Default is './spec'.
   keep_byproducts : bool, optional
       Whether to keep the source-separated audio and spectrograms or not. Default is False.
-  multi : bool, optional
-      Whether to use multiprocessing for extracting spectrograms. Default is True.
+  overwrite : bool, optional
+      Whether to overwrite the existing analysis results or not. Default is False.
+  multiprocess : bool, optional
+      Whether to use multiprocessing for spectrogram extraction, visualization, and sonification. Default is True.
 
   Returns
   -------
@@ -77,70 +74,92 @@ def analyze(
       Analysis results for the provided audio files.
   """
 
+  # Clean up the arguments.
   return_list = True
   if not isinstance(paths, list):
     return_list = False
     paths = [paths]
+  if not paths:
+    raise ValueError('At least one path must be specified.')
   paths = [mkpath(p) for p in paths]
   paths = expand_paths(paths)
+  paths = sorted(paths)
   check_paths(paths)
   demix_dir = mkpath(demix_dir)
   spec_dir = mkpath(spec_dir)
-  device = torch.device(device)
-  print(f'=> Found {len(paths)} tracks to analyze.')
 
-  demix_paths = demix(paths, demix_dir, device)
+  # Check if the results are already computed.
+  out_paths = [out_dir / path.with_suffix('.json').name for path in paths]
+  if overwrite:
+    todo_paths = paths
+    exist_paths = []
+  else:
+    todo_paths = [path for path, out_path in zip(paths, out_paths) if not out_path.exists()]
+    exist_paths = [out_path for path, out_path in zip(paths, out_paths) if out_path.exists()]
 
-  spec_paths = extract_spectrograms(demix_paths, spec_dir, multiprocess)
+  print(f'=> Found {len(exist_paths)} tracks already analyzed and {len(todo_paths)} tracks to analyze.')
+  if exist_paths:
+    print(f'=> To re-analyze, please use --overwrite option.')
 
-  model = load_pretrained_model(
-    model_name=model,
-    device=device,
-  )
+  # Load the results for the tracks that are already analyzed.
+  results = [
+    load_result(
+      exist_path,
+      load_activations=include_activations,
+      load_embeddings=include_embeddings,
+    )
+    for exist_path in tqdm(exist_paths, desc='Loading existing results')
+  ]
 
-  results = []
-  with torch.no_grad():
-    pbar = tqdm(zip(paths, spec_paths), total=len(paths))
-    for path, spec_path in pbar:
-      pbar.set_description(f'Analyzing {path.name}')
+  # Analyze the tracks that are not analyzed yet.
+  if todo_paths:
+    # Run HTDemucs for source separation only for the tracks that are not analyzed yet.
+    demix_paths = demix(todo_paths, demix_dir, device)
 
-      spec = np.load(spec_path)
-      spec = torch.from_numpy(spec).unsqueeze(0).to(device)
+    # Extract spectrograms for the tracks that are not analyzed yet.
+    spec_paths = extract_spectrograms(demix_paths, spec_dir, multiprocess)
 
-      logits = model(spec)
+    # Load the model.
+    model = load_pretrained_model(
+      model_name=model,
+      device=device,
+    )
 
-      metrical_structure = postprocess_metrical_structure(logits, model.cfg)
-      functional_structure = postprocess_functional_structure(logits, model.cfg)
-      bpm = estimate_tempo_from_beats(metrical_structure['beats'])
+    with torch.no_grad():
+      pbar = tqdm(zip(todo_paths, spec_paths), total=len(todo_paths))
+      for path, spec_path in pbar:
+        pbar.set_description(f'Analyzing {path.name}')
 
-      result = AnalysisResult(
-        path=path,
-        bpm=bpm,
-        segments=functional_structure,
-        **metrical_structure,
-      )
-      results.append(result)
+        result = run_inference(
+          path=path,
+          spec_path=spec_path,
+          model=model,
+          device=device,
+          include_activations=include_activations,
+          include_embeddings=include_embeddings,
+        )
 
-      if include_activations:
-        activations = compute_activations(logits)
-        result.activations = activations
+        # Save the result right after the inference.
+        # Checkpointing is always important for this kind of long-running tasks...
+        # for my mental health...
+        if out_dir is not None:
+          save_results(result, out_dir)
 
-      if include_embeddings:
-        result.embeddings = logits.embeddings[0].cpu().numpy()
+        results.append(result)
 
-  if out_dir is not None:
-    save_results(results, out_dir)
+  # Sort the results by the original order of the tracks.
+  results = sorted(results, key=lambda result: paths.index(result.path))
 
   if visualize:
     if visualize is True:
       visualize = './viz'
-    _visualize(results, out_dir=visualize)
+    _visualize(results, out_dir=visualize, multiprocess=multiprocess)
     print(f'=> Plots are successfully saved to {visualize}')
 
   if sonify:
     if sonify is True:
       sonify = './sonif'
-    _sonify(results, out_dir=sonify)
+    _sonify(results, out_dir=sonify, multiprocess=multiprocess)
     print(f'=> Sonified tracks are successfully saved to {sonify}')
 
   if not keep_byproducts:
