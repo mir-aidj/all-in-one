@@ -5,6 +5,10 @@ from typing import List
 def estimate_tempo_from_beats(
   beats: List[float],
 ):
+  if len(beats) < 2:
+    # The song has less than 2 beats. Perhaps it doesn't have much percussive elements.
+    return None
+
   beats = np.array(beats)
   beat_interval = np.diff(beats)
   bpm = 60. / beat_interval
