@@ -89,11 +89,11 @@ def analyze(
   spec_dir = mkpath(spec_dir)
 
   # Check if the results are already computed.
-  out_paths = [out_dir / path.with_suffix('.json').name for path in paths]
-  if overwrite:
+  if out_dir is None or overwrite:
     todo_paths = paths
     exist_paths = []
   else:
+    out_paths = [out_dir / path.with_suffix('.json').name for path in paths]
     todo_paths = [path for path, out_path in zip(paths, out_paths) if not out_path.exists()]
     exist_paths = [out_path for path, out_path in zip(paths, out_paths) if out_path.exists()]
 
@@ -102,14 +102,16 @@ def analyze(
     print(f'=> To re-analyze, please use --overwrite option.')
 
   # Load the results for the tracks that are already analyzed.
-  results = [
-    load_result(
-      exist_path,
-      load_activations=include_activations,
-      load_embeddings=include_embeddings,
-    )
-    for exist_path in tqdm(exist_paths, desc='Loading existing results')
-  ]
+  results = []
+  if exist_paths:
+    results += [
+      load_result(
+        exist_path,
+        load_activations=include_activations,
+        load_embeddings=include_embeddings,
+      )
+      for exist_path in tqdm(exist_paths, desc='Loading existing results')
+    ]
 
   # Analyze the tracks that are not analyzed yet.
   if todo_paths:
