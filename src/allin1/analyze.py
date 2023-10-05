@@ -93,7 +93,7 @@ def analyze(
     todo_paths = paths
     exist_paths = []
   else:
-    out_paths = [out_dir / path.with_suffix('.json').name for path in paths]
+    out_paths = [mkpath(out_dir) / path.with_suffix('.json').name for path in paths]
     todo_paths = [path for path, out_path in zip(paths, out_paths) if not out_path.exists()]
     exist_paths = [out_path for path, out_path in zip(paths, out_paths) if out_path.exists()]
 
