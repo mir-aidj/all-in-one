@@ -27,7 +27,7 @@ class DataConfig:
 
   path_base_dir: str
   path_track_dir: str
-  path_demixed_dir: str
+  path_demix_dir: str
   path_feature_dir: str
   path_no_demixed_feature_dir: str
 
@@ -47,7 +47,7 @@ class HarmonixConfig(DataConfig):
 
   path_base_dir: str = './data/harmonix/'
   path_track_dir: str = './data/harmonix/tracks/'
-  path_demixed_dir: str = './data/harmonix/demixed/'
+  path_demix_dir: str = './data/harmonix/demix/'
   path_feature_dir: str = './data/harmonix/features/'
   path_no_demixed_feature_dir: str = './data/harmonix/features_no_demixed/'
   path_metadata: str = './data/harmonix/metadata.csv'
@@ -64,13 +64,13 @@ defaults = [
 
 @dataclass
 class Config:
-  debug: bool = False
-  sanity_check: bool = False
+  debug: bool = False  # For debugging.
+  sanity_check: bool = False  # For overfitting a small subset of data.
   sanity_check_size: int = 1
   offline: bool = False
 
   case: Optional[str] = None
-  model: str = 'allinone'  # allin1, tcn
+  model: str = 'allinone'
 
   data: DataConfig = MISSING
   defaults: List[Any] = field(default_factory=lambda: defaults)

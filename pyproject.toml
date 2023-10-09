@@ -34,6 +34,15 @@ dependencies = [
   "matplotlib",
 ]
 
+[project.optional-dependencies]
+train = [
+  "lightning",
+  "timm",
+  "wandb",
+  "mir_eval",
+  "numpy<1.24", # otherwise, mir_eval will raise AttributeError: module 'numpy' has no attribute 'int'
+]
+
 [project.urls]
 Documentation = "https://github.com/mir-aidj/all-in-one#readme"
 Issues = "https://github.com/mir-aidj/all-in-one/issues"
@@ -41,6 +50,8 @@ Source = "https://github.com/mir-aidj/all-in-one"
 
 [project.scripts]
 allin1 = "allin1.cli:main"
+allin1-train = "allin1.training.train:main"
+allin1-preprocess = "allin1.training.preprocess:main"
 
 [tool.hatch.version]
 path = "src/allin1/__about__.py"

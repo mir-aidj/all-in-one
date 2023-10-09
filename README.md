@@ -27,6 +27,7 @@ This package provides models for music structure analysis, predicting:
 - [Speed](#speed)
 - [Advanced Usage for Research](#advanced-usage-for-research)
 - [Concerning MP3 Files](#concerning-mp3-files)
+- [Training](TRAINING.md)
 - [Citation](#citation)
 
 ## Installation
@@ -449,6 +450,9 @@ where the conventional tolerance is just 70ms.
 Hence, I advise standardizing inputs to the WAV format for all data processing, 
 ensuring straightforward decoding.
 
+
+## Training
+Please refer to [TRAINING.md](TRAINING.md).
 
 ## Citation
 If you use this package for your research, please cite the following paper:

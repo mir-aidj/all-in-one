@@ -30,7 +30,6 @@ def postprocess_functional_structure(
     pred_boundary_times = np.append(pred_boundary_times, duration)
   pred_boundaries = np.stack([pred_boundary_times[:-1], pred_boundary_times[1:]]).T
 
-  #
   pred_boundary_indices = np.flatnonzero(boundary)
   pred_boundary_indices = pred_boundary_indices[pred_boundary_indices > 0]
   prob_segment_function = np.split(prob_functions, pred_boundary_indices, axis=1)
