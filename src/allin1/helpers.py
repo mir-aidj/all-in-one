@@ -48,6 +48,7 @@ def run_inference(
 
   return result
 
+
 def compute_activations(logits: AllInOneOutput):
   activations_beat = torch.sigmoid(logits.logits_beat[0]).cpu().numpy()
   activations_downbeat = torch.sigmoid(logits.logits_downbeat[0]).cpu().numpy()
@@ -72,7 +73,7 @@ def expand_paths(paths: List[Path]):
     else:
       expanded_paths.add(path)
 
-  return list(expanded_paths)
+  return sorted(expanded_paths)
 
 
 def check_paths(paths: List[Path]):

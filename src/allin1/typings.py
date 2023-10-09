@@ -71,3 +71,25 @@ class AnalysisResult:
         result.embeddings = np.load(embed_path)
 
     return result
+
+
+@dataclass
+class AllInOnePrediction:
+  raw_prob_beats: torch.FloatTensor
+  raw_prob_downbeats: torch.FloatTensor
+  raw_prob_sections: torch.FloatTensor
+  raw_prob_functions: torch.FloatTensor
+
+  prob_beats: torch.FloatTensor
+  prob_downbeats: torch.FloatTensor
+  prob_sections: torch.FloatTensor
+  prob_functions: NDArray[np.float32]
+
+  pred_beats: NDArray[np.float32]
+  pred_downbeats: NDArray[np.float32]
+  pred_sections: NDArray[np.float32]
+  pred_functions: NDArray[np.float32]
+
+  pred_beat_times: NDArray[np.float32]
+  pred_downbeat_times: NDArray[np.float32]
+  pred_section_times: NDArray[np.float32]

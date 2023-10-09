@@ -83,7 +83,6 @@ def analyze(
     raise ValueError('At least one path must be specified.')
   paths = [mkpath(p) for p in paths]
   paths = expand_paths(paths)
-  paths = sorted(paths)
   check_paths(paths)
   demix_dir = mkpath(demix_dir)
   spec_dir = mkpath(spec_dir)
