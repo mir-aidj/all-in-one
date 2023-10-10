@@ -78,7 +78,7 @@ def evaluate(
         run.config.update({
           'best_threshold_beat': threshold_beat.item(),
           'best_threshold_downbeat': threshold_downbeat.item(),
-        })
+        }, allow_val_change=True)
         if hasattr(run, 'update'):
           run.update()
 
