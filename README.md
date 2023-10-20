@@ -32,6 +32,21 @@ This package provides models for music structure analysis, predicting:
 
 ## Installation
 
+### Docker
+
+Build the image:
+
+```
+docker build --tag=allin1:latest .
+```
+
+Run the container and mount current directory as a volume:
+```
+docker run -it -v .:/app allin1:latest
+```
+
+Follow steps in [Usage for CLI](#usage-for-cli) or [Usage for Python](#usage-for-python)
+
 ### 1. Install PyTorch
 
 Visit [PyTorch](https://pytorch.org/) and install the appropriate version for your system.
