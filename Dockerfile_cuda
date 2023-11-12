@@ -1,5 +1,6 @@
 FROM nvidia/cuda:12.2.2-base-ubuntu22.04 as system
 
+
 FROM system as build
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
@@ -19,5 +20,9 @@ RUN pip3 install librosa demucs hydra-core omegaconf huggingface_hub matplotlib
 RUN pip3 install pytest
 # install allin1
 RUN pip3 install git+https://github.com:Starchild-Music/all-in-one.git@v1.1.0#egg=allin1
+
+
+FROM application as runtime
 WORKDIR /app
+COPY . .
 

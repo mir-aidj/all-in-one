@@ -1,7 +1,6 @@
 FROM python:3.10-slim as system
 
 # base image
-RUN useradd --create-home --shell /bin/bash allin1_user
 RUN apt update && apt upgrade -y
 RUN apt install build-essential gcc git ffmpeg -y
 RUN pip3 install --upgrade pip setuptools
@@ -18,7 +17,9 @@ FROM build as application
 RUN pip3 install librosa demucs hydra-core omegaconf huggingface_hub matplotlib
 # test packages
 RUN pip3 install pytest
+# install allin1
+RUN pip3 install git+https://github.com:Starchild-Music/all-in-one.git@v1.1.0#egg=allin1
 
 FROM application as runtime
-WORKDIR /home/allin1_user
+WORKDIR /app
 COPY . .
