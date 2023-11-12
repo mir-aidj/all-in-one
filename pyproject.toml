@@ -7,17 +7,16 @@ name = "allin1"
 dynamic = ["version"]
 description = "All-In-One Music Structure Analyzer"
 readme = "README.md"
-requires-python = ">=3.8"
-license = "MIT"
+requires-python = ">=3.10"
+license = "Other::Proprietary"
 keywords = ["music", "beat", "downbeat", "tracking", "structure", "analysis", "allin1"]
 authors = [
   { name = "Taejun Kim", email = "taejun@kaist.ac.kr" },
+  { name = "Starchild Music Corp.", email = "engineering@starchildmusic.ai" }
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: Implementation :: CPython",
@@ -26,7 +25,7 @@ classifiers = [
 dependencies = [
   "numpy",
   "librosa",
-  "natten; platform_system == 'Darwin'",
+  "natten",
   "demucs",
   "hydra-core",
   "omegaconf",
@@ -58,3 +57,12 @@ path = "src/allin1/__about__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/allin1"]
+
+[tool.hatch.build]
+exclude = [
+  "/*.md",
+  "Dockerfile*",
+  "/docs",
+  "/tests",
+  "/assets",
+]

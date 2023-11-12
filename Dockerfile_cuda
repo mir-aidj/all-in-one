@@ -16,13 +16,9 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 FROM build as application
 # runtime packages
 RUN pip3 install librosa demucs hydra-core omegaconf huggingface_hub matplotlib
-# test packages
-RUN pip3 install pytest
 # install allin1
 RUN pip3 install git+https://github.com:Starchild-Music/all-in-one.git@v1.1.0#egg=allin1
 
 
 FROM application as runtime
 WORKDIR /app
-COPY . .
-
