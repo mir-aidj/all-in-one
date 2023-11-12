@@ -163,7 +163,7 @@ def analyze(
     _sonify(results, out_dir=sonify, multiprocess=multiprocess)
     print(f'=> Sonified tracks are successfully saved to {sonify}')
 
-  if not keep_byproducts:
+  if not keep_byproducts and demix_paths:
     for path in demix_paths:
       for stem in ['bass', 'drums', 'other', 'vocals']:
         (path / f'{stem}.wav').unlink(missing_ok=True)
